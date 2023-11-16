@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/budoux/bundle/budoux-ja.min.js"></script>
+    <script src="wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+            module = result.module;
+            inst = result.instance;
+            go.run(inst);
+        });
+    </script>
+    <title>CSV-JSON Converter</title>
+</head>
+<body>
+    <h1 class="title">CSV-JSON Converter</h1>
+    <hr />
+    <p><budoux-ja>以下のラジオボタンから変換する内容を選択してください. また当サイトではサーバにファイルを保存する, 収集するというような処理は行っていません</budoux-ja></p>
+    <div class="select-action">
+        <div>
+            <input type="radio" id="csv-to-json" name="select" value="0" checked/>
+            <label for="csv-to-json">CSVからJSONへ変換する</label>
+        </div>
+        <div>
+            <input type="radio" id="json-to-csv" name="select" value="1"/>
+            <label for="json-to-csv">JSONからCSVへ変換する</label>
+        </div>
+    </div>
+
+    <div>
+        <label for="source-file">変換したいファイルを選択してください</label><br />
+        <input type="file" id="source-file" name="source-file" accept="text/csv"/>
+    </div>
+    <div style="text-align: center;"><button id="conv">変換</button></div>
+    <div id="err-msg"><span id="err-msg-spn"></span></div>
+    <a href="#" id="output-file" style="display: none;"download>download</a>
+</body>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function(){
+    const radios = document.querySelectorAll('input[type="radio"]');
+    radios.forEach((radio) => {
+        radio.addEventListener("change", changeAction);
+    });
+
+    const button = document.getElementById("conv");
+    button.addEventListener("click", convert);
+});
+function changeAction(){
+    const radio = document.querySelector('input[type="radio"]:checked');
+    const file = document.getElementById("source-file")
+    if(radio.id === "csv-to-json"){
+        file.accept = "text/csv";
+    }else{
+        file.accept = "application/json";
+    }
+}
+function convert(e){
+    document.getElementById("err-msg-spn").innerText = "";
+    const radio = document.querySelector('input[type="radio"]:checked');
+    const file = document.getElementById("source-file").files[0];
+    if(file == undefined){
+        document.getElementById("err-msg-spn").innerText = "ファイルを選択してください";
+        return;
+    }
+    if(file.size == 0){
+        document.getElementById("err-msg-spn").innerText = "ファイルが空です";
+        return;
+    }
+    if(
+        (radio.value == "0" && file.type != "text/csv")
+        || (radio.value == "1" && file.type != "application/json")
+    ){
+        document.getElementById("err-msg-spn").innerText = "ファイル形式が不正です";
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener(
+        "load",
+        () => {
+            SelectFunc(radio.value, file.name, reader.result);
+        },
+        false,
+    );
+    if (file) {
+        reader.readAsText(file);
+    }
+}
+</script>
+</html>
