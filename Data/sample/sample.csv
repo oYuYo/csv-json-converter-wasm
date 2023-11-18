@@ -1,20 +1,4 @@
-[
-  {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "age": 30
-  },
-  {
-    "id": 2,
-    "name": "Jane Doe",
-    "email": "jane@example.com",
-    "age": 25
-  },
-  {
-    "id": 3,
-    "name": "Bob Smith",
-    "email": "bob@example.com",
-    "age": 35
-  }
-]
+email,age,id,name
+john@example.com,30,1,John Doe
+jane@example.com,25,2,Jane Doe
+bob@example.com,35,3,Bob Smith
